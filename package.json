@@ -4,7 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon -r ./src/server.js"
+    "start-prod": "NODE_ENV=production node ./src/server.js",
+    "start": "nodemon -r ./src/server.js",
+    "lint": "eslint ./src"
   },
   "keywords": [],
   "author": "",
