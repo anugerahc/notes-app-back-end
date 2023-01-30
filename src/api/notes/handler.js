@@ -1,3 +1,6 @@
+const ClientError = require('../../exceptions/ClientError');
+const NotFoundError = require('../../exceptions/NotFoundError');
+
 class NotesHandler {
     constructor(service, validator){
         this._service = service;
@@ -27,11 +30,20 @@ class NotesHandler {
             return response;
 
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statuscode);
+                return response;
+            }
             const response = h.response({
-                status: 'fail',
-                message: error.message,
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(400);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
@@ -62,11 +74,20 @@ class NotesHandler {
             return response;
 
         } catch (error) {
+            if (error instanceof NotFoundError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statuscode);
+                return response;
+            }
             const response = h.response({
-                status: 'fail',
-                message: error.message,
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(404);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
@@ -86,11 +107,20 @@ class NotesHandler {
             return response;
 
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statuscode);
+                return response;
+            }
             const response = h.response({
-                status: 'fail',
-                message: error.message,
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(400);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
@@ -109,11 +139,20 @@ class NotesHandler {
             return response;
 
         } catch (error) {
+            if (error instanceof NotFoundError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statuscode);
+                return response;
+            }
             const response = h.response({
-                status: 'fail',
-                message: error.message,
+                status: 'error',
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(404);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
