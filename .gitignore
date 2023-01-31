@@ -2,3 +2,4 @@ node_modules
 notes-web-server.pem
 .env
 .prod.env
+user.txt
