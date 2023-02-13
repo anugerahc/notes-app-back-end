@@ -49,11 +49,13 @@ const init = async () => {
     },
     validate: (artifacts) => ({
       isValid: true,
-      Credentials: {
-        id: artifacts.decoded.payload.id,
-      },
+        Credentials: {
+          id: artifacts.decoded.payload.id,
+        },
     }),
   });
+
+  server.auth.default('notesapp_jwt');
 
   await server.register([
     {
