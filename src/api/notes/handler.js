@@ -1,5 +1,4 @@
 const ClientError = require('../../exceptions/ClientError');
-const NotFoundError = require('../../exceptions/NotFoundError');
 
 class NotesHandler {
     constructor(service, validator){
@@ -16,6 +15,10 @@ class NotesHandler {
     async postNoteHandler(request, h) {
         try {
             const noteValidated = this._validator.validateNotePayload(request.payload);
+
+            const {id: credentialId} = request.auth.credentials;
+
+            Object.assign(noteValidated, {owner: credentialId});
 
             const noteId = await this._service.addNote(noteValidated);
 
@@ -48,8 +51,10 @@ class NotesHandler {
         }
     }
 
-    async getNotesHandler(){
-        const notes = await this._service.getNotes();
+    async getNotesHandler(request){
+        const {id: credentialId} = request.auth.credentials;
+
+        const notes = await this._service.getNotes(credentialId);
 
         return {
             status: 'success',
@@ -62,6 +67,11 @@ class NotesHandler {
     async getNoteByIdHandler(request, h){
         try {
             const {id} = request.params;
+
+            const {id: credentialId} = request.auth.credentials;
+
+            await this._service.verifyNoteOwner(id, credentialId);
+
             const note = await this._service.getNoteById(id);
 
             const response = h.response({
@@ -74,7 +84,7 @@ class NotesHandler {
             return response;
 
         } catch (error) {
-            if (error instanceof NotFoundError){
+            if (error instanceof ClientError){
                 const response = h.response({
                     status: 'fail',
                     message: error.message,
@@ -96,6 +106,10 @@ class NotesHandler {
         try {
             const noteValidated = this._validator.validateNotePayload(request.payload);
             const {id} = request.params;
+
+            const {id: credentialId} = request.auth.credentials;
+
+            await this._service.verifyNoteOwner(id, credentialId);
 
             await this._service.editNoteById(id, noteValidated);
 
@@ -129,6 +143,10 @@ class NotesHandler {
         try {
             const {id} = request.params;
 
+            const {id: credentialId} = request.auth.credentials;
+
+            await this._service.verifyNoteOwner(id, credentialId);
+
             await this._service.deleteNoteById(id);
 
             const response = h.response({
@@ -139,7 +157,7 @@ class NotesHandler {
             return response;
 
         } catch (error) {
-            if (error instanceof NotFoundError){
+            if (error instanceof ClientError){
                 const response = h.response({
                     status: 'fail',
                     message: error.message,

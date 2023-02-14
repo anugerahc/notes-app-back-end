@@ -55,8 +55,6 @@ const init = async () => {
     }),
   });
 
-  server.auth.default('notesapp_jwt');
-
   await server.register([
     {
       plugin: notes,
