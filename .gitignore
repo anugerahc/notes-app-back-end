@@ -3,3 +3,4 @@ notes-web-server.pem
 .env
 .prod.env
 user.txt
+src/api/uploads/file
