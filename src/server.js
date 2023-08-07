@@ -10,6 +10,9 @@ const notes = require('./api/notes');
 const NotesService = require('./services/postgres/notesService');
 const {NotesValidator} = require('./validator/notes');
 
+// Cache
+const CacheService = require('./services/redis/CacheService');
+
 // Exports Plugin
 const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
@@ -38,8 +41,9 @@ const CollaborationService = require('./services/postgres/collaborationsService'
 const CollaborationsValidator = require('./validator/collaborations');
 
 const init = async () => {
-  const collaborationsService = new CollaborationService();
-  const notesService = new NotesService(collaborationsService);
+  const cacheService = new CacheService();
+  const collaborationsService = new CollaborationService(cacheService);
+  const notesService = new NotesService(collaborationsService, cacheService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   // const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));

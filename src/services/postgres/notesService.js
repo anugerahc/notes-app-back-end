@@ -3,13 +3,13 @@ const {Pool} = require('pg');
 const AuthorizartionError = require('../../exceptions/AuthorizartionError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const QueryError = require('../../exceptions/QueryError');
 const {mapDBToModel} = require('../../utils');
 
 class NotesService {
-    constructor(collaborationService) {
+    constructor(collaborationService, cacheService) {
         this._pool = new Pool();
         this._collaborationService = collaborationService;
+        this._cacheService = cacheService;
     }
 
     async verifyNoteAccess(noteId, userId){
@@ -68,6 +68,11 @@ class NotesService {
 
     async getNotes(owner){
         try {
+            const result = await this._cacheService.get(`notes:${owner}`);
+
+            return JSON.parse(result);
+
+        } catch (error) {
             const query = {
                 text: `SELECT notes.* FROM notes 
                 LEFT JOIN collaborations on collaborations.note_id = notes.id 
@@ -77,10 +82,11 @@ class NotesService {
             };
     
             const result = await this._pool.query(query);
+            const mappedResult = result.rows.map(mapDBToModel);
+
+            await this._cacheService.set(`notes:${owner}`, JSON.stringify(mappedResult));
     
-            return result.rows.map(mapDBToModel);
-        } catch (error) {
-            throw new QueryError(error.stack);
+            return mappedResult;
         }
     }
 
@@ -114,6 +120,10 @@ class NotesService {
         if (!result.rows.length){
             throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan');
         }
+
+        const {owner} = result.rows[0];
+
+        await this._cacheService.delete(`notes:${owner}`);
     }
 
     async deleteNoteById(id){
@@ -127,6 +137,10 @@ class NotesService {
         if (!result.rows.length){
             throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan');
         }
+
+        const {owner} = result.rows[0];
+
+        await this._cacheService.delete(`notes:${owner}`);
     }
 }
 
